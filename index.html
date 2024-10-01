@@ -109,15 +109,15 @@
                 </div>
             </div>
 
-            <div v-else class="mb-6">
-                <h2 class="text-base font-semibold mb-4 text-gray-400">Number of questions:</h2>
+            <div v-else class="mb-8">
+                <h2 class="text-base font-semibold mb-4 text-gray-400 text-center tracking-wide">Number of questions</h2>
                 <div class="flex justify-between w-full">
                     <button 
                         v-for="count in questionCountOptions" 
                         :key="count"
                         @click="questionCount = count"
-                        class="py-2 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out flex-grow mx-1"
-                        :class="questionCount === count ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'"
+                        class="py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out flex-grow mx-1"
+                        :class="questionCount === count ? 'bg-indigo-600 text-white shadow-md' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'"
                     >
                         {{ count }}
                     </button>
