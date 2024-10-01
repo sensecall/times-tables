@@ -286,6 +286,7 @@
                     combinationStats: {},
                     showSummary: false,
                     showDebugMenu: false,
+                    lastQuestion: null, // Add this line to store the last question
                 }
             },
             computed: {
@@ -307,6 +308,7 @@
                     this.generateNextQuestion()
                     this.questionsAnswered = 0
                     this.showNextEquation = true
+                    this.lastQuestion = null // Reset lastQuestion when starting a new game
 
                     if (this.gameMode === 'timed') {
                         this.timeLeft = this.timerDuration
@@ -322,42 +324,46 @@
                 generateQuestion() {
                     let a, b, result;
                     
-                    switch (this.difficulty) {
-                        case 'easy':
-                            a = [2, 5, 10][Math.floor(Math.random() * 3)];
-                            b = Math.floor(Math.random() * 10) + 1;
-                            result = a * b;
-                            this.equation = `${a} × ${b}`;
-                            this.answer = result;
-                            break;
-                        case 'medium':
-                            a = Math.floor(Math.random() * 9) + 2; // 2 to 10
-                            b = Math.floor(Math.random() * 9) + 2; // 2 to 10
-                            result = a * b;
-                            if (Math.random() < 0.5) {
-                                this.equation = `${a} × ? = ${result}`;
-                                this.answer = b;
-                            } else {
-                                this.equation = `? × ${b} = ${result}`;
-                                this.answer = a;
-                            }
-                            break;
-                        case 'hard':
-                            a = Math.floor(Math.random() * 11) + 2; // 2 to 12
-                            b = Math.floor(Math.random() * 11) + 2; // 2 to 12
-                            result = a * b;
-                            if (Math.random() < 0.33) {
-                                this.equation = `${a} × ${b} = ?`;
+                    do {
+                        switch (this.difficulty) {
+                            case 'easy':
+                                a = [2, 5, 10][Math.floor(Math.random() * 3)];
+                                b = Math.floor(Math.random() * 10) + 1;
+                                result = a * b;
+                                this.equation = `${a} × ${b}`;
                                 this.answer = result;
-                            } else if (Math.random() < 0.66) {
-                                this.equation = `? × ${b} = ${result}`;
-                                this.answer = a;
-                            } else {
-                                this.equation = `${a} × ? = ${result}`;
-                                this.answer = b;
-                            }
-                            break;
-                    }
+                                break;
+                            case 'medium':
+                                a = Math.floor(Math.random() * 9) + 2; // 2 to 10
+                                b = Math.floor(Math.random() * 9) + 2; // 2 to 10
+                                result = a * b;
+                                if (Math.random() < 0.5) {
+                                    this.equation = `${a} × ? = ${result}`;
+                                    this.answer = b;
+                                } else {
+                                    this.equation = `? × ${b} = ${result}`;
+                                    this.answer = a;
+                                }
+                                break;
+                            case 'hard':
+                                a = Math.floor(Math.random() * 11) + 2; // 2 to 12
+                                b = Math.floor(Math.random() * 11) + 2; // 2 to 12
+                                result = a * b;
+                                if (Math.random() < 0.33) {
+                                    this.equation = `${a} × ${b} = ?`;
+                                    this.answer = result;
+                                } else if (Math.random() < 0.66) {
+                                    this.equation = `? × ${b} = ${result}`;
+                                    this.answer = a;
+                                } else {
+                                    this.equation = `${a} × ? = ${result}`;
+                                    this.answer = b;
+                                }
+                                break;
+                        }
+                    } while (this.equation === this.lastQuestion); // Repeat if it's the same as the last question
+                    
+                    this.lastQuestion = this.equation; // Store the current question
                     
                     // Update number usage
                     this.updateNumberUsage(a);
@@ -368,42 +374,44 @@
                 generateNextQuestion() {
                     let a, b, result;
                     
-                    switch (this.difficulty) {
-                        case 'easy':
-                            a = [2, 5, 10][Math.floor(Math.random() * 3)];
-                            b = Math.floor(Math.random() * 10) + 1;
-                            result = a * b;
-                            this.nextEquation = `${a} × ${b}`;
-                            this.nextAnswer = result;
-                            break;
-                        case 'medium':
-                            a = Math.floor(Math.random() * 9) + 2; // 2 to 10
-                            b = Math.floor(Math.random() * 9) + 2; // 2 to 10
-                            result = a * b;
-                            if (Math.random() < 0.5) {
-                                this.nextEquation = `${a} × ? = ${result}`;
-                                this.nextAnswer = b;
-                            } else {
-                                this.nextEquation = `? × ${b} = ${result}`;
-                                this.nextAnswer = a;
-                            }
-                            break;
-                        case 'hard':
-                            a = Math.floor(Math.random() * 11) + 2; // 2 to 12
-                            b = Math.floor(Math.random() * 11) + 2; // 2 to 12
-                            result = a * b;
-                            if (Math.random() < 0.33) {
-                                this.nextEquation = `${a} × ${b} = ?`;
+                    do {
+                        switch (this.difficulty) {
+                            case 'easy':
+                                a = [2, 5, 10][Math.floor(Math.random() * 3)];
+                                b = Math.floor(Math.random() * 10) + 1;
+                                result = a * b;
+                                this.nextEquation = `${a} × ${b}`;
                                 this.nextAnswer = result;
-                            } else if (Math.random() < 0.66) {
-                                this.nextEquation = `? × ${b} = ${result}`;
-                                this.nextAnswer = a;
-                            } else {
-                                this.nextEquation = `${a} × ? = ${result}`;
-                                this.nextAnswer = b;
-                            }
-                            break;
-                    }
+                                break;
+                            case 'medium':
+                                a = Math.floor(Math.random() * 9) + 2; // 2 to 10
+                                b = Math.floor(Math.random() * 9) + 2; // 2 to 10
+                                result = a * b;
+                                if (Math.random() < 0.5) {
+                                    this.nextEquation = `${a} × ? = ${result}`;
+                                    this.nextAnswer = b;
+                                } else {
+                                    this.nextEquation = `? × ${b} = ${result}`;
+                                    this.nextAnswer = a;
+                                }
+                                break;
+                            case 'hard':
+                                a = Math.floor(Math.random() * 11) + 2; // 2 to 12
+                                b = Math.floor(Math.random() * 11) + 2; // 2 to 12
+                                result = a * b;
+                                if (Math.random() < 0.33) {
+                                    this.nextEquation = `${a} × ${b} = ?`;
+                                    this.nextAnswer = result;
+                                } else if (Math.random() < 0.66) {
+                                    this.nextEquation = `? × ${b} = ${result}`;
+                                    this.nextAnswer = a;
+                                } else {
+                                    this.nextEquation = `${a} × ? = ${result}`;
+                                    this.nextAnswer = b;
+                                }
+                                break;
+                        }
+                    } while (this.nextEquation === this.equation || this.nextEquation === this.lastQuestion); // Repeat if it's the same as the current or last question
                     
                     // Update number usage
                     this.updateNumberUsage(a);
@@ -513,6 +521,7 @@
                     this.totalTime = 0
                     this.showSummary = false // Reset the summary visibility
                     this.loadCombinationStats()
+                    this.lastQuestion = null // Reset lastQuestion when resetting the game
                 },
                 handleKeyPress(event) {
                     // Only handle key presses when the game is active
