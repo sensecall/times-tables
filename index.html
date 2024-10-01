@@ -50,20 +50,20 @@
         </div>
         
         <div v-if="!gameStarted && !gameEnded" class="mb-6 bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4 text-indigo-600">Game Mode:</h2>
+            <div class="mb-8">
+                <h2 class="text-base font-semibold mb-4 text-gray-400 text-center tracking-wide">Game mode</h2>
                 <div class="grid grid-cols-2 gap-4">
                     <button 
                         v-for="mode in ['timed', 'fixed']" 
                         :key="mode"
                         @click="gameMode = mode"
-                        class="flex flex-col items-center py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out"
-                        :class="gameMode === mode ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'"
+                        class="flex flex-col items-center py-4 px-6 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out"
+                        :class="gameMode === mode ? 'bg-indigo-600 text-white shadow-md' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'"
                     >
-                        <svg v-if="mode === 'timed'" class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg v-if="mode === 'timed'" class="w-8 h-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <svg v-else class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg v-else class="w-8 h-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                         </svg>
                         {{ mode.charAt(0).toUpperCase() + mode.slice(1) }}
@@ -71,21 +71,21 @@
                 </div>
             </div>
 
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4 text-indigo-600">Choose your difficulty level:</h2>
-                <div class="grid grid-cols-3 gap-2">
+            <div class="mb-8">
+                <h2 class="text-base font-semibold mb-4 text-gray-400 text-center tracking-wide">Difficulty</h2>
+                <div class="grid grid-cols-3 gap-3">
                     <button 
                         v-for="level in ['easy', 'medium', 'hard']" 
                         :key="level"
                         @click="difficulty = level"
-                        class="py-2 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out flex flex-col items-center"
+                        class="py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out flex flex-col items-center"
                         :class="{
-                            'bg-indigo-600 text-white': difficulty === level,
+                            'bg-indigo-600 text-white shadow-md': difficulty === level,
                             'bg-indigo-100 text-indigo-600 hover:bg-indigo-200': difficulty !== level
                         }"
                     >
-                        <div class="flex mb-1">
-                            <svg v-for="i in (level === 'easy' ? 1 : level === 'medium' ? 2 : 3)" :key="i" class="w-4 h-4 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <div class="flex mb-2">
+                            <svg v-for="i in (level === 'easy' ? 1 : level === 'medium' ? 2 : 3)" :key="i" class="w-5 h-5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
                         </div>
@@ -94,15 +94,15 @@
                 </div>
             </div>
             
-            <div v-if="gameMode === 'timed'" class="mb-6">
-                <h2 class="text-xl font-semibold mb-4 text-indigo-600">Timer:</h2>
+            <div v-if="gameMode === 'timed'" class="mb-8">
+                <h2 class="text-base font-semibold mb-4 text-gray-400 text-center tracking-wide">Timer</h2>
                 <div class="flex justify-between w-full">
                     <button 
                         v-for="duration in timerOptions" 
                         :key="duration"
                         @click="timerDuration = duration"
-                        class="py-2 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out flex-grow mx-1"
-                        :class="timerDuration === duration ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'"
+                        class="py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out flex-grow mx-1"
+                        :class="timerDuration === duration ? 'bg-indigo-600 text-white shadow-md' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'"
                     >
                         {{ duration }}s
                     </button>
@@ -110,7 +110,7 @@
             </div>
 
             <div v-else class="mb-6">
-                <h2 class="text-xl font-semibold mb-4 text-indigo-600">Number of Questions:</h2>
+                <h2 class="text-base font-semibold mb-4 text-gray-400">Number of questions:</h2>
                 <div class="flex justify-between w-full">
                     <button 
                         v-for="count in questionCountOptions" 
@@ -169,14 +169,24 @@
             </div>
             
             <div class="grid grid-cols-3 gap-3 sm:gap-5 mb-5">
-                <button v-for="n in 9" :key="n" @click="selectNumber(n)" class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl lg:text-2xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 active:bg-indigo-300 text-indigo-700 bg-indigo-100 hover:bg-indigo-200 shadow-md hover:shadow-lg relative overflow-hidden">
+                <button 
+                    v-for="n in 9" 
+                    :key="n" 
+                    @touchstart.prevent="selectNumber(n)" 
+                    @click="selectNumber(n)" 
+                    class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl lg:text-2xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 active:bg-indigo-300 text-indigo-700 bg-indigo-100 hover:bg-indigo-200 shadow-md hover:shadow-lg relative overflow-hidden"
+                >
                     <span class="relative z-10">{{ n }}</span>
                     <span class="absolute inset-0 bg-indigo-300 transform scale-0 transition-transform duration-300 ease-out rounded-lg" :class="{ 'scale-100': pressedNumber === n }" @transitionend="pressedNumber = null"></span>
                 </button>
             </div>
             
             <div class="grid grid-cols-3 gap-3 sm:gap-5">
-                <button @click="clearInput" class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 active:bg-red-600 text-white bg-red-500 hover:bg-red-600 shadow-md hover:shadow-lg relative overflow-hidden">
+                <button 
+                    @touchstart.prevent="clearInput" 
+                    @click="clearInput" 
+                    class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 active:bg-red-600 text-white bg-red-500 hover:bg-red-600 shadow-md hover:shadow-lg relative overflow-hidden"
+                >
                     <span class="relative z-10">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 sm:w-7 sm:h-7">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" />
@@ -184,11 +194,21 @@
                     </span>
                     <span class="absolute inset-0 bg-red-600 transform scale-0 transition-transform duration-300 ease-out rounded-lg" :class="{ 'scale-100': pressedNumber === 'clear' }" @transitionend="pressedNumber = null"></span>
                 </button>
-                <button @click="selectNumber(0)" class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl lg:text-2xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 active:bg-indigo-300 text-indigo-700 bg-indigo-100 hover:bg-indigo-200 shadow-md hover:shadow-lg relative overflow-hidden">
+                <button 
+                    @touchstart.prevent="selectNumber(0)" 
+                    @click="selectNumber(0)" 
+                    class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl lg:text-2xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 active:bg-indigo-300 text-indigo-700 bg-indigo-100 hover:bg-indigo-200 shadow-md hover:shadow-lg relative overflow-hidden"
+                >
                     <span class="relative z-10">0</span>
                     <span class="absolute inset-0 bg-indigo-300 transform scale-0 transition-transform duration-300 ease-out rounded-lg" :class="{ 'scale-100': pressedNumber === 0 }" @transitionend="pressedNumber = null"></span>
                 </button>
-                <button @click="submitAnswer" :disabled="!submitEnabled" class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 text-white shadow-md hover:shadow-lg relative overflow-hidden" :class="submitEnabled ? 'bg-green-500 hover:bg-green-600 active:bg-green-700' : 'bg-gray-400 cursor-not-allowed'">
+                <button 
+                    @touchstart.prevent="submitAnswer" 
+                    @click="submitAnswer" 
+                    :disabled="!submitEnabled" 
+                    class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 text-white shadow-md hover:shadow-lg relative overflow-hidden" 
+                    :class="submitEnabled ? 'bg-green-500 hover:bg-green-600 active:bg-green-700' : 'bg-gray-400 cursor-not-allowed'"
+                >
                     <span class="relative z-10">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 sm:w-7 sm:h-7">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -390,8 +410,12 @@
                     this.updateNumberUsage(b);
                 },
                 selectNumber(num) {
-                    this.currentInput += num.toString()
-                    this.submitEnabled = true
+                    this.currentInput += num.toString();
+                    this.submitEnabled = true;
+                    this.pressedNumber = num;
+                    setTimeout(() => {
+                        this.pressedNumber = null;
+                    }, 100);
                 },
                 clearInput() {
                     this.currentInput = ''
