@@ -2,14 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Times Tables Practice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        /* Prevent text selection */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* Prevent iOS from zooming on input focus */
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-blue-100 to-purple-100 text-gray-800 min-h-screen flex items-center justify-center">
     <div id="app" class="container mx-auto p-4 max-w-md">
-        <div class="flex items-center justify-between mb-6">
+        <!-- Add this button in a corner of the screen -->
+        <button @click="toggleDebugMenu" class="fixed top-2 right-2 bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">Debug</button>
+
+        <!-- Add this debug menu -->
+        <div v-if="showDebugMenu" class="fixed top-10 right-2 bg-white p-4 rounded shadow-lg z-50">
+            <h3 class="text-lg font-bold mb-2">Debug Menu</h3>
+            <button @click="skipToGameStart" class="block w-full bg-blue-500 text-white px-3 py-1 rounded mb-2">Start Game</button>
+            <button @click="skipToGameEnd" class="block w-full bg-green-500 text-white px-3 py-1 rounded mb-2">End Game</button>
+            <button @click="addScore" class="block w-full bg-yellow-500 text-white px-3 py-1 rounded mb-2">Add Score (+1)</button>
+            <button @click="subtractTime" class="block w-full bg-red-500 text-white px-3 py-1 rounded mb-2">Subtract Time (-10s)</button>
+        </div>
+
+        <div v-if="!gameStarted" class="flex items-center justify-between mb-6">
             <button @click="resetGame" class="text-indigo-600 hover:text-indigo-800 transition-colors duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -107,17 +134,17 @@
         </div>
 
         <div v-else-if="gameStarted" class="bg-white p-4 sm:p-8 rounded-2xl shadow-lg relative">
-            <div class="absolute -top-3 -left-3 flex flex-col items-center">
-                <div class="bg-indigo-100 rounded-full w-16 h-16 border-2 border-indigo-200 shadow-md flex items-center justify-center">
-                    <span class="text-2xl font-bold text-indigo-600">{{ timeLeft }}</span>
+            <div class="absolute top-3 sm:top-4 left-2 sm:left-3 flex flex-col items-center">
+                <div class="bg-indigo-100 rounded-full w-12 h-12 sm:w-16 sm:h-16 border-2 border-indigo-200 shadow-md flex items-center justify-center">
+                    <span class="text-lg sm:text-2xl font-bold text-indigo-600">{{ timeLeft }}</span>
                 </div>
             </div>
-            <div class="absolute -top-3 right-3 flex">
+            <div class="absolute top-5 right-10 flex">
                 <div class="relative">
-                    <div class="absolute -top-1 left-0 bg-red-600 text-white font-extrabold py-2 px-3 rounded-lg shadow-md transform rotate-3 z-10 text-2xl font-game border border-red-700">
+                    <div class="absolute -top-1 left-0 bg-red-600 text-white font-extrabold py-1 sm:py-2 px-2 sm:px-3 rounded-lg shadow-md transform rotate-3 z-10 text-lg sm:text-2xl font-game border border-red-700">
                         {{ incorrectGuesses }}
                     </div>
-                    <div class="absolute -top-2 -left-9 bg-green-600 text-white font-extrabold py-2 px-3 rounded-lg shadow-md transform -rotate-3 z-20 text-2xl font-game border border-green-700">
+                    <div class="absolute -top-2 -left-7 sm:-left-9 bg-green-600 text-white font-extrabold py-1 sm:py-2 px-2 sm:px-3 rounded-lg shadow-md transform -rotate-3 z-20 text-lg sm:text-2xl font-game border border-green-700">
                         {{ score }}
                     </div>
                 </div>
@@ -141,24 +168,33 @@
                 <div v-if="isIncorrectFlashing" class="absolute inset-0 bg-red-500 transition-opacity duration-500" :style="{ opacity: incorrectFlashOpacity }"></div>
             </div>
             
-            <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-4">
-                <button v-for="n in 9" :key="n" @click="selectNumber(n)" class="aspect-square flex items-center justify-center text-2xl sm:text-3xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 text-indigo-700 bg-indigo-100 hover:bg-indigo-200 shadow-md hover:shadow-lg">
-                    {{ n }}
+            <div class="grid grid-cols-3 gap-3 sm:gap-5 mb-5">
+                <button v-for="n in 9" :key="n" @click="selectNumber(n)" class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl lg:text-2xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 active:bg-indigo-300 text-indigo-700 bg-indigo-100 hover:bg-indigo-200 shadow-md hover:shadow-lg relative overflow-hidden">
+                    <span class="relative z-10">{{ n }}</span>
+                    <span class="absolute inset-0 bg-indigo-300 transform scale-0 transition-transform duration-300 ease-out rounded-lg" :class="{ 'scale-100': pressedNumber === n }" @transitionend="pressedNumber = null"></span>
                 </button>
             </div>
-            <div class="grid grid-cols-3 gap-2 sm:gap-4">
-                <button @click="clearInput" class="aspect-square flex items-center justify-center text-xl sm:text-2xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 text-white bg-red-500 hover:bg-red-600 shadow-md hover:shadow-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 sm:w-8 sm:h-8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" />
-                    </svg>
+            
+            <div class="grid grid-cols-3 gap-3 sm:gap-5">
+                <button @click="clearInput" class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 active:bg-red-600 text-white bg-red-500 hover:bg-red-600 shadow-md hover:shadow-lg relative overflow-hidden">
+                    <span class="relative z-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 sm:w-7 sm:h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" />
+                        </svg>
+                    </span>
+                    <span class="absolute inset-0 bg-red-600 transform scale-0 transition-transform duration-300 ease-out rounded-lg" :class="{ 'scale-100': pressedNumber === 'clear' }" @transitionend="pressedNumber = null"></span>
                 </button>
-                <button @click="selectNumber(0)" class="aspect-square flex items-center justify-center text-2xl sm:text-3xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 text-indigo-700 bg-indigo-100 hover:bg-indigo-200 shadow-md hover:shadow-lg">
-                    0
+                <button @click="selectNumber(0)" class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl lg:text-2xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 active:bg-indigo-300 text-indigo-700 bg-indigo-100 hover:bg-indigo-200 shadow-md hover:shadow-lg relative overflow-hidden">
+                    <span class="relative z-10">0</span>
+                    <span class="absolute inset-0 bg-indigo-300 transform scale-0 transition-transform duration-300 ease-out rounded-lg" :class="{ 'scale-100': pressedNumber === 0 }" @transitionend="pressedNumber = null"></span>
                 </button>
-                <button @click="submitAnswer" :disabled="!submitEnabled" class="aspect-square flex items-center justify-center text-xl sm:text-2xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 text-white shadow-md hover:shadow-lg" :class="submitEnabled ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-400 cursor-not-allowed'">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 sm:w-8 sm:h-8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
+                <button @click="submitAnswer" :disabled="!submitEnabled" class="aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded-lg transition-all duration-300 ease-in-out active:scale-95 text-white shadow-md hover:shadow-lg relative overflow-hidden" :class="submitEnabled ? 'bg-green-500 hover:bg-green-600 active:bg-green-700' : 'bg-gray-400 cursor-not-allowed'">
+                    <span class="relative z-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 sm:w-7 sm:h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                    </span>
+                    <span v-if="submitEnabled" class="absolute inset-0 bg-green-700 transform scale-0 transition-transform duration-300 ease-out rounded-lg" :class="{ 'scale-100': pressedNumber === 'submit' }" @transitionend="pressedNumber = null"></span>
                 </button>
             </div>
         </div>
@@ -175,10 +211,16 @@
             </div>
             <button @click="resetGame" class="w-full bg-indigo-600 text-white px-6 py-4 rounded-lg text-xl font-bold transition-all duration-300 ease-in-out hover:bg-indigo-700 active:scale-95 shadow-md hover:shadow-lg mb-4">Play Again</button>
             
-            <h3 class="text-xl font-bold mb-2 text-indigo-700">Times Tables Practice</h3>
-            <div class="grid grid-cols-5 gap-2 text-sm">
-                <div v-for="n in 12" :key="n" class="p-2 rounded" :style="getColorStyle(n)">
-                    <span class="font-bold">{{ n }}:</span> {{ numberUsage[n] || 0 }}
+            <button @click="showSummary = true" class="w-full bg-green-600 text-white px-6 py-4 rounded-lg text-xl font-bold transition-all duration-300 ease-in-out hover:bg-green-700 active:scale-95 shadow-md hover:shadow-lg mb-4">Show Summary</button>
+            
+            <div v-if="showSummary" class="mt-6">
+                <h3 class="text-xl font-bold mb-2 text-indigo-700">Times Tables Summary</h3>
+                <div class="grid grid-cols-3 gap-2 text-sm">
+                    <div v-for="(stats, combination) in combinationStats" :key="combination" class="p-2 rounded bg-indigo-100">
+                        <span class="font-bold">{{ combination }}:</span>
+                        <br>Correct: {{ stats.correct }}
+                        <br>Incorrect: {{ stats.incorrect }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -204,7 +246,7 @@
                     totalTime: 0,
                     incorrectGuesses: 0,
                     timerDuration: 60,
-                    timerOptions: [10, 15, 30, 45, 60],
+                    timerOptions: [10, 30, 60],
                     questionCount: 10,
                     questionCountOptions: [10, 20, 50],
                     questionsAnswered: 0,
@@ -221,6 +263,9 @@
                     clockInterval: null,
                     numberUsage: {},
                     maxUsage: 100, // Maximum usage for colour scale
+                    combinationStats: {},
+                    showSummary: false,
+                    showDebugMenu: false,
                 }
             },
             computed: {
@@ -356,7 +401,12 @@
                     if (!this.submitEnabled) return
                     
                     const currentNumber = parseInt(this.currentInput)
-                    if (currentNumber === this.answer) {
+                    const isCorrect = currentNumber === this.answer
+
+                    // Update combination stats
+                    this.updateCombinationStats(isCorrect)
+
+                    if (isCorrect) {
                         this.score++
                         this.questionsAnswered++
                         this.showFullAnswer = true
@@ -437,7 +487,8 @@
                     this.timeLeft = this.timerDuration
                     this.incorrectGuesses = 0
                     this.totalTime = 0
-                    this.loadNumberUsage(); // Load the number usage when resetting the game
+                    this.showSummary = false // Reset the summary visibility
+                    this.loadCombinationStats()
                 },
                 handleKeyPress(event) {
                     // Only handle key presses when the game is active
@@ -492,13 +543,94 @@
                 updateMaxUsage() {
                     this.maxUsage = Math.max(...Object.values(this.numberUsage), 100);
                 },
+                updateCombinationStats(isCorrect) {
+                    const [a, b] = this.getCurrentCombination()
+                    const key = `${a}x${b}`
+                    
+                    if (!this.combinationStats[key]) {
+                        this.combinationStats[key] = { correct: 0, incorrect: 0 }
+                    }
+                    
+                    if (isCorrect) {
+                        this.combinationStats[key].correct++
+                    } else {
+                        this.combinationStats[key].incorrect++
+                    }
+
+                    this.saveCombinationStats()
+                },
+
+                getCurrentCombination() {
+                    const parts = this.equation.split(' ')
+                    let a, b
+                    if (parts[1] === '×') {
+                        a = parseInt(parts[0])
+                        b = parts[2] === '?' ? this.answer : parseInt(parts[2])
+                    } else if (parts[0] === '?') {
+                        a = this.answer
+                        b = parseInt(parts[2])
+                    } else {
+                        a = parseInt(parts[0])
+                        b = this.answer
+                    }
+                    return [Math.min(a, b), Math.max(a, b)]
+                },
+
+                saveCombinationStats() {
+                    localStorage.setItem('combinationStats', JSON.stringify(this.combinationStats))
+                },
+
+                loadCombinationStats() {
+                    const savedStats = localStorage.getItem('combinationStats')
+                    if (savedStats) {
+                        this.combinationStats = JSON.parse(savedStats)
+                    }
+                },
+                toggleDebugMenu() {
+                    this.showDebugMenu = !this.showDebugMenu;
+                },
+                skipToGameStart() {
+                    this.resetGame();
+                    this.startGame();
+                },
+                skipToGameEnd() {
+                    this.endGame();
+                },
+                addScore() {
+                    this.score++;
+                },
+                subtractTime() {
+                    if (this.gameMode === 'timed') {
+                        this.timeLeft = Math.max(0, this.timeLeft - 10);
+                        if (this.timeLeft === 0) {
+                            this.endGame();
+                        }
+                    }
+                },
             },
             mounted() {
                 window.addEventListener('keydown', this.handleKeyPress);
-                this.loadNumberUsage(); // Load the number usage when the app is mounted
+                this.loadCombinationStats();
+                
+                // Prevent double-tap zoom on iOS
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', (event) => {
+                    const now = (new Date()).getTime();
+                    if (now - lastTouchEnd <= 300) {
+                        event.preventDefault();
+                    }
+                    lastTouchEnd = now;
+                }, false);
+
+                // Prevent pull-to-refresh on mobile browsers
+                document.body.addEventListener('touchmove', (e) => {
+                    if (e.touches.length > 1) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
             },
             beforeUnmount() {
-                window.removeEventListener('keydown', this.handleKeyPress);
+                window.removeEventListener('keydown', this.handleKeyPress)
             }
         })
 
