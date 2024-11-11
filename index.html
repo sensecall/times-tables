@@ -25,7 +25,7 @@
 <body class="bg-gradient-to-br from-blue-100 to-purple-100 text-gray-800 min-h-screen">
     <div id="app" class="container mx-auto p-4 max-w-md pt-4">
         <!-- Add this button in a corner of the screen -->
-        <button @click="toggleDebugMenu" class="fixed top-2 right-2 bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">Debug</button>
+        <!-- <button @click="toggleDebugMenu" class="fixed top-2 right-2 bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">Debug</button> -->
 
         <!-- Add this debug menu -->
         <div v-if="showDebugMenu" class="fixed top-10 right-2 bg-white p-4 rounded shadow-lg z-50">
@@ -227,11 +227,13 @@
             
             <div v-if="showSummary" class="mt-6">
                 <h3 class="text-xl font-bold mb-2 text-indigo-700">Times Tables Summary</h3>
-                <div class="grid grid-cols-3 gap-2 text-sm">
-                    <div v-for="(stats, combination) in combinationStats" :key="combination" class="p-2 rounded bg-indigo-100">
-                        <span class="font-bold">{{ combination }}:</span>
-                        <br>Correct: {{ stats.correct }}
-                        <br>Incorrect: {{ stats.incorrect }}
+                <div class="grid grid-cols-10 gap-1">
+                    <div v-for="i in 10" :key="`row-${i}`" class="contents">
+                        <div v-for="j in 10" :key="`cell-${i}-${j}`" 
+                             class="aspect-square flex items-center justify-center text-xs font-bold rounded"
+                             :style="getCellStyle(`${i}x${j}`)">
+                            {{ i }}x{{ j }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -279,6 +281,7 @@
                     showSummary: false,
                     showDebugMenu: false,
                     lastQuestion: null, // Add this line to store the last question
+                    maxCorrectAnswers: 100, // Maximum number of correct answers for colour scale
                 }
             },
             computed: {
@@ -326,16 +329,11 @@
                                 this.answer = result;
                                 break;
                             case 'medium':
-                                a = Math.floor(Math.random() * 9) + 2; // 2 to 10
-                                b = Math.floor(Math.random() * 9) + 2; // 2 to 10
+                                a = [2, 3, 4, 5, 10][Math.floor(Math.random() * 5)];
+                                b = Math.floor(Math.random() * 12) + 1; // 1 to 12
                                 result = a * b;
-                                if (Math.random() < 0.5) {
-                                    this.equation = `${a} × ? = ${result}`;
-                                    this.answer = b;
-                                } else {
-                                    this.equation = `? × ${b} = ${result}`;
-                                    this.answer = a;
-                                }
+                                this.equation = `${a} × ${b} = ?`;
+                                this.answer = result;
                                 break;
                             case 'hard':
                                 a = Math.floor(Math.random() * 11) + 2; // 2 to 12
@@ -565,20 +563,20 @@
                     this.maxUsage = Math.max(...Object.values(this.numberUsage), 100);
                 },
                 updateCombinationStats(isCorrect) {
-                    const [a, b] = this.getCurrentCombination()
-                    const key = `${a}x${b}`
+                    const [a, b] = this.getCurrentCombination();
+                    const key = `${a}x${b}`;
                     
                     if (!this.combinationStats[key]) {
-                        this.combinationStats[key] = { correct: 0, incorrect: 0 }
+                        this.combinationStats[key] = { correct: 0, incorrect: 0 };
                     }
                     
                     if (isCorrect) {
-                        this.combinationStats[key].correct++
+                        this.combinationStats[key].correct++;
                     } else {
-                        this.combinationStats[key].incorrect++
+                        this.combinationStats[key].incorrect++;
                     }
 
-                    this.saveCombinationStats()
+                    this.saveCombinationStats();
                 },
 
                 getCurrentCombination() {
@@ -598,13 +596,13 @@
                 },
 
                 saveCombinationStats() {
-                    localStorage.setItem('combinationStats', JSON.stringify(this.combinationStats))
+                    localStorage.setItem('combinationStats', JSON.stringify(this.combinationStats));
                 },
 
                 loadCombinationStats() {
-                    const savedStats = localStorage.getItem('combinationStats')
+                    const savedStats = localStorage.getItem('combinationStats');
                     if (savedStats) {
-                        this.combinationStats = JSON.parse(savedStats)
+                        this.combinationStats = JSON.parse(savedStats);
                     }
                 },
                 toggleDebugMenu() {
@@ -627,6 +625,32 @@
                             this.endGame();
                         }
                     }
+                },
+                getCellStyle(combination) {
+                    const [a, b] = combination.split('x').map(Number);
+                    const key = `${Math.min(a, b)}x${Math.max(a, b)}`;
+                    const stats = this.combinationStats[key] || { correct: 0, incorrect: 0 };
+                    const netCorrect = Math.max(0, stats.correct - stats.incorrect);
+                    const percentage = Math.min((netCorrect / this.maxCorrectAnswers) * 100, 100);
+                    const hue = (percentage * 1.2).toFixed(0); // Hue from 0 (red) to 120 (green)
+                    const lightness = 80 - (percentage * 0.3); // Lightness from 80% to 50%
+                    const bgColor = `hsl(${hue}, 80%, ${lightness}%)`;
+                    const textColor = this.getContrastColor(hue, lightness);
+                    return {
+                        backgroundColor: bgColor,
+                        color: textColor,
+                        fontSize: '0.7rem', // Adjust font size for better readability
+                        fontWeight: 'bold'
+                    };
+                },
+
+                getContrastColor(hue, lightness) {
+                    // For very light backgrounds (high lightness), use dark text
+                    if (lightness > 70) return '#000000';
+                    // For very dark backgrounds (low lightness), use light text
+                    if (lightness < 30) return '#FFFFFF';
+                    // For mid-range lightness, base text color on hue
+                    return (hue < 60 || hue > 180) ? '#FFFFFF' : '#000000';
                 },
             },
             mounted() {
